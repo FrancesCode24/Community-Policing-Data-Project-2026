@@ -33,6 +33,8 @@ vacpd %>%
     force_by_officer = sum(FORCE.USED.BY.OFFICER == "Y", na.rm = TRUE), 
     force_rate = FORCE.USED.BY.OFFICER / tot_stops * 100)
 
+glimpse(vacpd)
+
 
 
 
