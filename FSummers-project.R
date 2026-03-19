@@ -9,7 +9,6 @@
 #To analyze ... 
 
 
-
 #Load the data----
 library(tidyverse)
 library(janitor)
@@ -93,5 +92,7 @@ vacpdQuarter %>%
   coord_flip()
 
   
+
+
 
 
