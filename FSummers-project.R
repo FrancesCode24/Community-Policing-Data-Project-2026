@@ -4,7 +4,9 @@
 
 #Start here----
 #Project Objective----
-# To analyze ... 
+  #To explore trends in Virginia police interactions with local residents, looking directly at racial disparities in stops, arrests, and use of force
+
+#To analyze ... 
 
 
 
@@ -12,43 +14,51 @@
 library(tidyverse)
 library(janitor)
 
-fbi_lee <- read_csv("~/Desktop/R class materials/community policing/data cp/fbi_lee_virginia.csv")
-saveRDS(fbi_lee, "data/fbi_lee.RDS")
-readRDS("data/fbi_lee.RDS")
-
-lee_1960_2024 <- read_csv("~/Desktop/R class materials/community policing/data cp/lee_1960_2024.csv")
-saveRDS(lee_1960_2024, "data/lee_1960_2024.RDS")
-readRDS("data/lee_1960_2024.RDS")
-
-vacpd <- read_csv("~/Desktop/R class materials/community policing/data cp/vacpd_20260225.csv")
-saveRDS(vacpd, "data/vacpd.RDS")
-readRDS("data/vacpd.RDS")
+fbi_lee <- readRDS("data/fbi_lee.RDS") #Includes all VA data
+vacpd <- readRDS("data/vacpd.RDS") #Includes all VA data
 
 #vacpd data----
 glimpse(vacpd)
 
+#Clean up the variable names
+vacpd <- vacpd %>% 
+           clean_names()
+
+#Specify year, month, and quarter of police stop
 vacpd <- vacpd %>%
-  mutate(date = mdy(STOP_DATE), 
-         year = year(date))
+  mutate(date = mdy(stop_date), 
+         year = year(date),
+         month = month(date),
+         quarter = quarter(date))
 
 #How many stops and force used by officer per year statewide?
 vacpd %>%
   group_by(year) %>%
   summarize(
     tot_stops = n(), 
-    force_by_officer = sum(FORCE.USED.BY.OFFICER == "Y", na.rm = TRUE), 
-    force_rate = FORCE.USED.BY.OFFICER / tot_stops * 100)
+    force_by_officer = sum(force_used_by_officer == "Y", na.rm = TRUE), 
+    force_rate = force_by_officer / tot_stops * 100)
 
-glimpse(action_taken)
+#Looking at agencies and jurisdictions. Helpful if we want to combine this with fbi data later.
+unique(vacpd$agency_name) #361 unique agencies
 
-#lee_1960_2024 data----
-
-
-#Question
+unique(vacpd$jurisdiction) #135 jurisdictions
 
 #fbi_lee data----
 
+#Only include 2020-2025 data
+fbi_lee <- fbi_lee %>% 
+            filter(data_year > 2019)
+
+#Looking at agencies
+unique(fbi_lee$pub_agency_name) #281 agencies
+
+fbi_lee %>% 
+  count(agency_type_name) %>% 
+  arrange(desc(n))
+
 #Question
+
 
 
 
