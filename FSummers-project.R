@@ -12,6 +12,7 @@
 #Load the data----
 library(tidyverse)
 library(janitor)
+library(tidycensus)
 
 fbi_lee <- readRDS("data/fbi_lee.RDS") #Includes all VA data
 vacpd <- readRDS("data/vacpd.RDS") #Includes all VA data
@@ -38,21 +39,11 @@ vacpd %>%
     force_by_officer = sum(force_used_by_officer == "Y", na.rm = TRUE), 
     force_rate = force_by_officer / tot_stops * 100)
 
-
-
-#Looking at agencies and jurisdictions. Helpful if we want to combine this with fbi data later.
-unique(vacpd$agency_name) #361 unique agencies
-
-unique(vacpd$jurisdiction) #135 jurisdictions
-
 #fbi_lee data----
 
 #Only include 2020-2025 data
 fbi_lee <- fbi_lee %>% 
             filter(data_year > 2019)
-
-#Looking at agencies
-unique(fbi_lee$pub_agency_name) #281 agencies
 
 fbi_lee %>% 
   count(agency_type_name) %>% 
@@ -102,12 +93,19 @@ vacpd <- vacpd %>%
   mutate(
     county_clean = jurisdiction %>%
       str_to_upper() %>%
-      str_replace("CO$", "") %>%
-      str_replace("COUNTY$", "") %>%
+      str_replace(" CO ", "") %>%
+      str_sub(end = -6) %>% 
       str_trim())
+#Maybe ignore this actually ^ -Win
 
+#Combine using agency names
+cbind(sort(unique(vacpd$agency_name)),sort(unique(fbi_lee$pub_agency_name)))
+
+#Need to edit this to be agency name, when we get agency names to match
 join_countyname <- fbi_lee %>%
-  left_join(vacpd, by = c("county_name" = "county_clean"))
+  left_join(vacpd, by = c("county_name" = "county_clean")) #Counties don't exactly match, so the merge isn't working
+
+
 #fbi_lee into vacpd: see last row of vacpd now includes county_clean
 ---------------------------------------------------------------------------------------------------
   
